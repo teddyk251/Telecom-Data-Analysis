@@ -2,7 +2,7 @@ import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 
-class Plot:
+class Plotter:
     def plot_hist(df:pd.DataFrame, column:str, color:str)->None:
         # plt.figure(figsize=(15, 10))
         # fig, ax = plt.subplots(1, figsize=(12, 7))

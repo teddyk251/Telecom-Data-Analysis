@@ -22,7 +22,4 @@ class Utils:
         except Exception as e:
             print(f"Saving failed {e}")
     
-    def convert_bytes_to_mb(self, bytes):
-        """
-        Convert bytes to megabytes.
-        """
+

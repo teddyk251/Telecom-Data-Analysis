@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sklearn.impute import SimpleImputer
 
 class DataCleaner:
 
@@ -17,6 +18,14 @@ class DataCleaner:
         """
 
         df[['start','end']] = df[['start','end']].apply(pd.to_datetime)
+
+        return df
+
+    def convert_to_string(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        convert columns to string
+        """
+        df[['bearer_id', 'imsi', 'msisdn/number', 'imei']] = df[['bearer_id', 'imsi', 'msisdn/number', 'imei']].astype(str)
 
         return df
 
@@ -49,6 +58,39 @@ class DataCleaner:
         missing_count = df[col].isnull().sum()
 
         return round(missing_count / col_len * 100, 2)
+
+    def fill_missing_values_categorical(self, df: pd.DataFrame, method: str) -> pd.DataFrame:
+        """
+        fill missing values with specified method
+        """
+
+        categorical_columns = df.select_dtypes(include=['object','datetime64[ns]']).columns
+
+        if method == "ffill":
+
+            for col in categorical_columns:
+                df[col] = df[col].fillna(method='ffill')
+
+            return df
+
+        elif method == "bfill":
+
+            for col in categorical_columns:
+                df[col] = df[col].fillna(method='bfill')
+
+            return df
+
+        elif method == "mode":
+            
+            imputer = SimpleImputer(strategy='most_frequent')
+            filled_df = pd.DataFrame(imputer.fit_transform(df[categorical_columns]))
+            filled_df.columns = categorical_columns
+
+            return filled_df
+        else:
+            print("Method unknown")
+            return df
+
 
 
     
