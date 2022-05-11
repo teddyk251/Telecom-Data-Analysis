@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 
 class DataCleaner:
-    def __init__(self, data_path):
-        self.df = pd.read_csv(data_path)
 
     def drop_duplicate(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -19,6 +17,14 @@ class DataCleaner:
         """
 
         df[['start','end']] = df[['start','end']].apply(pd.to_datetime)
+
+        return df
+
+    def remove_whitespace_column(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        remove whitespace from columns
+        """
+        df.columns = [column.replace(' ', '_').lower() for column in df.columns]
 
         return df
 
