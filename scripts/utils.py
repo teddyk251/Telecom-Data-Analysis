@@ -23,9 +23,9 @@ class Utils:
         except Exception as e:
             print(f"Saving failed {e}")
 
-    def convert_bytes_to_megabytes(self, df: pd.DataFrame, bytes_data) -> pd.Series:
+    def convert_bytes_to_megabytes(self,  bytes_data:float) -> float:
 
         megabyte = 1*10e+5
-        megabyte_col = df[bytes_data] / megabyte
+        result_mb = bytes_data / megabyte
 
-        return megabyte_col
+        return result_mb
