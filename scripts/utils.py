@@ -14,7 +14,7 @@ class Utils:
             print("File not found.")
         return df
 
-    def save_data(self, df:pd.Dataframe, data_path:str) -> None:
+    def save_data(self, df: pd.DataFrame, data_path:str) -> None:
         """
         Save data to a csv file.
         """

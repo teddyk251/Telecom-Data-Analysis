@@ -85,12 +85,22 @@ class DataCleaner:
             imputer = SimpleImputer(strategy='most_frequent')
             filled_df = pd.DataFrame(imputer.fit_transform(df[categorical_columns]))
             filled_df.columns = categorical_columns
-
-            return filled_df
+            df[categorical_columns] = filled_df
+            return df
         else:
             print("Method unknown")
             return df
 
+    def fill_missing_values_numeric(self, df: pd.DataFrame, method: str) -> pd.DataFrame:
+        """
+        fill missing values with specified method
+        """
+        numeric_columns = df.select_dtypes(include=['number']).columns
+        imputer = SimpleImputer(strategy=method)
+        filled_numeric_columns_df = pd.DataFrame(imputer.fit_transform(df[numeric_columns]))
+        filled_numeric_columns_df.columns = numeric_columns
+        df[numeric_columns] = filled_numeric_columns_df
 
+        return df
 
     
