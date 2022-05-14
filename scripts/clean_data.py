@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import Normalizer, MinMaxScaler
+from sklearn.preprocessing import Normalizer, MinMaxScaler, StandardScaler
 from sklearn.impute import SimpleImputer
 
 class DataCleaner:
@@ -26,7 +26,7 @@ class DataCleaner:
         """
         convert columns to string
         """
-        df[['bearer_id', 'imsi', 'msisdn/number', 'imei']] = df[['bearer_id', 'imsi', 'msisdn/number', 'imei']].astype(str)
+        df[['bearer_id', 'imsi', 'msisdn/number', 'imei','handset_type']] = df[['bearer_id', 'imsi', 'msisdn/number', 'imei','handset_type']].astype(str)
 
         return df
 
@@ -147,7 +147,14 @@ class DataCleaner:
         minmax_scaler = MinMaxScaler()
         return pd.DataFrame(minmax_scaler.fit_transform(df[self.get_numerical_columns(df)]), columns=self.get_numerical_columns(df))
 
-    def handle_outliers(self, df:pd.DataFrame, col:str) -> pd.DataFrame:
+    def standard_scaler(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        scale numerical columns
+        """
+        standard_scaler = StandardScaler()
+        return pd.DataFrame(standard_scaler.fit_transform(df[self.get_numerical_columns(df)]), columns=self.get_numerical_columns(df))
+
+    def handle_outliers(self, df:pd.DataFrame, col:str, method:str ='IQR') -> pd.DataFrame:
         """
         Handle Outliers of a specified column using Turkey's IQR method
         """
@@ -157,9 +164,16 @@ class DataCleaner:
         
         lower_bound = q1 - ((1.5) * (q3 - q1))
         upper_bound = q3 + ((1.5) * (q3 - q1))
+        if method == 'mode':
+            df[col] = np.where(df[col] < lower_bound, df[col].mode()[0], df[col])
+            df[col] = np.where(df[col] > upper_bound, df[col].mode()[0], df[col])
         
-        df[col] = np.where(df[col] < lower_bound, lower_bound, df[col])
-        df[col] = np.where(df[col] > upper_bound, upper_bound, df[col])
+        elif method == 'median':
+            df[col] = np.where(df[col] < lower_bound, df[col].median, df[col])
+            df[col] = np.where(df[col] > upper_bound, df[col].median, df[col])
+        else:
+            df[col] = np.where(df[col] < lower_bound, lower_bound, df[col])
+            df[col] = np.where(df[col] > upper_bound, upper_bound, df[col])
         
         return df
 
