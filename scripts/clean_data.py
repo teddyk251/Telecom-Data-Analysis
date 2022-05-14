@@ -147,7 +147,7 @@ class DataCleaner:
         minmax_scaler = MinMaxScaler()
         return pd.DataFrame(minmax_scaler.fit_transform(df[self.get_numerical_columns(df)]), columns=self.get_numerical_columns(df))
 
-    def handle_outliers(self, df:pd.DataFrame, col:str) -> pd.DataFrame:
+    def handle_outliers(self, df:pd.DataFrame, col:str, method:str ='IQR') -> pd.DataFrame:
         """
         Handle Outliers of a specified column using Turkey's IQR method
         """
@@ -157,9 +157,16 @@ class DataCleaner:
         
         lower_bound = q1 - ((1.5) * (q3 - q1))
         upper_bound = q3 + ((1.5) * (q3 - q1))
+        if method == 'mode':
+            df[col] = np.where(df[col] < lower_bound, df[col].mode()[0], df[col])
+            df[col] = np.where(df[col] > upper_bound, df[col].mode()[0], df[col])
         
-        df[col] = np.where(df[col] < lower_bound, lower_bound, df[col])
-        df[col] = np.where(df[col] > upper_bound, upper_bound, df[col])
+        elif method == 'median':
+            df[col] = np.where(df[col] < lower_bound, df[col].median, df[col])
+            df[col] = np.where(df[col] > upper_bound, df[col].median, df[col])
+        else:
+            df[col] = np.where(df[col] < lower_bound, lower_bound, df[col])
+            df[col] = np.where(df[col] > upper_bound, upper_bound, df[col])
         
         return df
 
