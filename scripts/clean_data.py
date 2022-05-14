@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import Normalizer, MinMaxScaler
 from sklearn.impute import SimpleImputer
 
 class DataCleaner:
@@ -47,6 +48,18 @@ class DataCleaner:
 
         return round(totalMising / totalCells * 100, 2)
 
+    def get_numerical_columns(self, df: pd.DataFrame) -> list:
+        """
+        get numerical columns
+        """
+        return df.select_dtypes(include=['number']).columns.to_list()
+
+    def get_categorical_columns(self, df: pd.DataFrame) -> list:
+        """
+        get categorical columns
+        """
+        return  df.select_dtypes(include=['object','datetime64[ns]']).columns.to_list()
+
     def percent_missing_column(self, df: pd.DataFrame, col:str) -> float:
         """
         calculate the percentage of missing values for the specified column
@@ -85,8 +98,9 @@ class DataCleaner:
             imputer = SimpleImputer(strategy='most_frequent')
             filled_df = pd.DataFrame(imputer.fit_transform(df[categorical_columns]))
             filled_df.columns = categorical_columns
-            df[categorical_columns] = filled_df
-            return df
+            print(filled_df.shape)
+            # df[categorical_columns] = filled_df
+            return filled_df
         else:
             print("Method unknown")
             return df
@@ -95,12 +109,59 @@ class DataCleaner:
         """
         fill missing values with specified method
         """
-        numeric_columns = df.select_dtypes(include=['number']).columns
-        imputer = SimpleImputer(strategy=method)
-        filled_numeric_columns_df = pd.DataFrame(imputer.fit_transform(df[numeric_columns]))
-        filled_numeric_columns_df.columns = numeric_columns
-        df[numeric_columns] = filled_numeric_columns_df
+        numeric_columns = self.get_numerical_columns(df)
+        if method == "mean":
+            for col in numeric_columns:
+                df[col].fillna(df[col].mean(), inplace=True)
+
+        elif method == "median":
+            for col in numeric_columns:
+                df[col].fillna(df[col].median(), inplace=True)
+        else:
+            print("Method unknown")
+        
+        return df
+
+    def remove_nan_categorical(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        remove columns with nan values for categorical columns
+        """
+
+        categorical_columns = self.get_categorical_columns(df)
+        for col in categorical_columns:
+            df = df[df[col] != 'nan']
 
         return df
+
+    def normalizer(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        normalize numerical columns
+        """
+        norm = Normalizer()
+        return pd.DataFrame(norm.fit_transform(df[self.get_numerical_columns(df)]), columns=self.get_numerical_columns(df))
+
+    def min_max_scaler(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        scale numerical columns
+        """
+        minmax_scaler = MinMaxScaler()
+        return pd.DataFrame(minmax_scaler.fit_transform(df[self.get_numerical_columns(df)]), columns=self.get_numerical_columns(df))
+
+    def handle_outliers(self, df:pd.DataFrame, col:str) -> pd.DataFrame:
+        """
+        Handle Outliers of a specified column using Turkey's IQR method
+        """
+        df = df.copy()
+        q1 = df[col].quantile(0.25)
+        q3 = df[col].quantile(0.75)
+        
+        lower_bound = q1 - ((1.5) * (q3 - q1))
+        upper_bound = q3 + ((1.5) * (q3 - q1))
+        
+        df[col] = np.where(df[col] < lower_bound, lower_bound, df[col])
+        df[col] = np.where(df[col] > upper_bound, upper_bound, df[col])
+        
+        return df
+
 
     
