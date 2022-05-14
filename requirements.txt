@@ -6,3 +6,4 @@ scikit-learn
 kneed
 streamlit
 mysql-connector
+toml
