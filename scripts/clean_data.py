@@ -26,7 +26,7 @@ class DataCleaner:
         """
         convert columns to string
         """
-        df[['bearer_id', 'imsi', 'msisdn/number', 'imei']] = df[['bearer_id', 'imsi', 'msisdn/number', 'imei']].astype(str)
+        df[['bearer_id', 'imsi', 'msisdn/number', 'imei','handset_type']] = df[['bearer_id', 'imsi', 'msisdn/number', 'imei','handset_type']].astype(str)
 
         return df
 
